@@ -1,0 +1,76 @@
+name: 'IaC Deploy WebApp only'
+
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        description: 'A GitHub Environment to pull action secrets from'
+        required: true
+        type: environment
+      REGION:
+        description: 'The Azure region to deploy to'
+        required: true
+        default: canadacentral
+      webappVnetResourceId:
+        description: 'The vnet resource ID (not uuid)'
+        required: true
+
+env:
+  event_sha: +refs/pull/${{ github.event.issue.number }}/merge
+
+permissions:
+      id-token: write
+      contents: read
+
+jobs:
+  prereqs:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.ENVIRONMENT }}
+    name: Prerequisite Checks
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: "Parameter Check"
+        run: |
+          echo "Environment : ${{ github.event.inputs.ENVIRONMENT }}"
+          echo "vnet resource ID : ${{ github.event.inputs.webappVnetResourceId }}"
+
+      - name: Azure Login
+        uses: Azure/login@v1.4.3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+  deployment:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.ENVIRONMENT }}
+    name: Deployment
+    needs: [prereqs]
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Azure Login
+        uses: Azure/login@v1.4.3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: "Deploy WebApp"
+        id: webapp
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.SUBSCRIPTION_ID }}
+          region: ${{ github.event.inputs.REGION }}
+          scope: subscription
+          template: ./IaC/bicep/rg-spoke/webapp.bicep
+          parameters: ./IaC/bicep/rg-spoke/webapp.parameters.json targetVnetResourceId=${{ github.event.inputs.clusterVnetResourceId }} vNetResourceGroup=rg-enterprise-networking-spokes-${{ github.event.inputs.REGION }} location=${{ github.event.inputs.REGION }} resourceGroupName=rg-BU0001A0009-${{ github.event.inputs.REGION }} gitOpsBootstrappingRepoBranch=${{ github.ref_name }}
+          failOnStdErr: false
+          deploymentName: carml-webapp-${{ github.event.inputs.REGION }}
