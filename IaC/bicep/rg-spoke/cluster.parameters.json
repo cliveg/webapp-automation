@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "westus2"
+            "value": "canadacentral"
         },
         "clusterAdminAadGroupObjectId": {
             "value": ""
@@ -18,10 +18,10 @@
             "value": "1.23.8"
         },
         "gitOpsBootstrappingRepoHttpsUrl": {
-            "value": "https://github.com/Azure/aks-baseline-automation"
+            "value": "https://github.com/cliveg/aks-baseline-automation"
         },
         "gitOpsBootstrappingRepoBranch": {
-            "value": "main"
+            "value": "lab"
         }
     }
 }
