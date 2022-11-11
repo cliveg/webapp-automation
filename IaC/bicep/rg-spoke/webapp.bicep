@@ -62,11 +62,12 @@ resource rg 'Microsoft.Resources/resourceGroups@2019-05-01' existing = {
 
 
 module serverfarms '../CARML/Microsoft.Web/serverfarms/deploy.bicep' = {
-  name: webAppPlan
+  name: webAppPlanName
   params: {
     // Required parameters
 //    name: '<<namePrefix>>-az-asp-x-001'
     name: webAppPlanName
+    location: location
     sku: {
       capacity: '1'
       family: 'S'
@@ -81,10 +82,11 @@ module serverfarms '../CARML/Microsoft.Web/serverfarms/deploy.bicep' = {
 module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
   name: webAppName
   params: {
+    location: location
     // Required parameters
     kind: 'app'
     name: webAppName
-    serverFarmResourceId: webAppPlan.id
+    serverFarmResourceId: serverfarms.outputs.resourceId
   }
   scope: resourceGroup(resourceGroupName)
   dependsOn: [
