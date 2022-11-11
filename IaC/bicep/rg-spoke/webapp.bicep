@@ -102,11 +102,11 @@ module logAnalytics '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bi
   ]
 }
 
-module appinsights '../CARML//Microsoft.Insights/components/deploy.bicep' = {
+module appinsights '../CARML/Microsoft.Insights/components/deploy.bicep' = {
   name: appInsightsName
   params: {
     name: appInsightsName
-    workspaceResourceId: logAnalytics.outputs.logAnalyticsWorkspaceId
+    workspaceResourceId: logAnalytics.outputs.resourceId
     location: location
   }
   scope: resourceGroup(resourceGroupName)
