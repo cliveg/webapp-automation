@@ -35,6 +35,7 @@ var webAppName = 'clive-az-wa-min-001'
 var webAppPlanName = 'clive-az-asp-x-001'
 //var webAppPlanName = '${uniqueString(deployment().name)}-serverfarms'
 var logAnalyticsWorkspaceName = 'la-${webAppName}'
+var appInsightsName = 'ai-${webAppName}'
 var resourceGroupNamePrivateDNSZone = 'iot-isolated'
 var resourceGroupNameVnet = 'rg-network-dev-cac'
 //var defaultAcrName = 'acraks${subRgUniqueString}'
@@ -73,12 +74,12 @@ resource subnetSites 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' exis
   name: 'site'
 }
 
-//resource clusterLa 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
+//resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
 //  scope: resourceGroup(resourceGroupName)
 //  name: logAnalyticsWorkspaceName
 //}
 
-module clusterLa '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bicep' = {
+module logAnalytics '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bicep' = {
   name: logAnalyticsWorkspaceName
   params: {
     name: logAnalyticsWorkspaceName
@@ -94,6 +95,19 @@ module clusterLa '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bicep
         publisher: 'Microsoft'
       }
     ]
+  }
+  scope: resourceGroup(resourceGroupName)
+  dependsOn: [
+    rg
+  ]
+}
+
+module appinsights '../CARML//Microsoft.Insights/components/deploy.bicep' = {
+  name: appInsightsName
+  params: {
+    name: appInsightsName
+    workspaceResourceId: logAnalytics.outputs.logAnalyticsWorkspaceId
+    location: location
   }
   scope: resourceGroup(resourceGroupName)
   dependsOn: [
@@ -124,6 +138,7 @@ module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
     kind: 'app'
     name: webAppName
     serverFarmResourceId: serverfarms.outputs.resourceId
+    appInsightId: appinsights.outputs.applicationId
     virtualNetworkSubnetId: subnetSites.id
     privateEndpoints:  [
       {
