@@ -11,9 +11,6 @@ on:
         description: 'The Azure region to deploy to'
         required: true
         default: canadacentral
-      webappVnetResourceId:
-        description: 'The vnet resource ID (not uuid)'
-        required: true
 
 env:
   event_sha: +refs/pull/${{ github.event.issue.number }}/merge
@@ -36,7 +33,6 @@ jobs:
       - name: "Parameter Check"
         run: |
           echo "Environment : ${{ github.event.inputs.ENVIRONMENT }}"
-          echo "vnet resource ID : ${{ github.event.inputs.webappVnetResourceId }}"
 
       - name: Azure Login
         uses: Azure/login@v1.4.3
