@@ -70,7 +70,7 @@ resource subnetPrivateEndpoints 'Microsoft.Network/virtualNetworks/subnets@2021-
 
 resource subnetSites 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
   parent: virtualNetwork
-  name: 'privateendpoints'
+  name: 'site'
 }
 
 //resource clusterLa 'Microsoft.OperationalInsights/workspaces@2021-06-01' existing = {
