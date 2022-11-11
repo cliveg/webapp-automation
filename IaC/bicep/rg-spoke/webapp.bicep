@@ -36,10 +36,7 @@ var webAppPlanName = 'clive-az-asp-x-001'
 //var webAppPlanName = '${uniqueString(deployment().name)}-serverfarms'
 
 
-//planId = '/subscriptions/<<subscriptionId>>/resourceGroups/validation-rg/providers/Microsoft.Web/serverFarms/adp-<<namePrefix>>-az-asp-x-001'
-
-//'${uniqueString(deployment().name)}-sites'
-//var logAnalyticsWorkspaceName = 'la-${webAppName}'
+var logAnalyticsWorkspaceName = 'la-${webAppName}'
 //var defaultAcrName = 'acraks${subRgUniqueString}'
 //var vNetResourceGroup = split(targetVnetResourceId, '/')[4]
 //var vnetName = split(targetVnetResourceId, '/')[8]
@@ -60,12 +57,33 @@ resource rg 'Microsoft.Resources/resourceGroups@2019-05-01' existing = {
 //  name: logAnalyticsWorkspaceName
 //}
 
+module clusterLa '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bicep' = {
+  name: logAnalyticsWorkspaceName
+  params: {
+    name: logAnalyticsWorkspaceName
+    location: location
+    serviceTier: 'PerGB2018'
+    dataRetention: 30
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+    gallerySolutions: [
+      {
+        name: 'KeyVaultAnalytics'
+        product: 'OMSGallery'
+        publisher: 'Microsoft'
+      }
+    ]
+  }
+  scope: resourceGroup(resourceGroupName)
+  dependsOn: [
+    rg
+  ]
+}
 
 module serverfarms '../CARML/Microsoft.Web/serverfarms/deploy.bicep' = {
   name: webAppPlanName
   params: {
     // Required parameters
-//    name: '<<namePrefix>>-az-asp-x-001'
     name: webAppPlanName
     location: location
     sku: {
