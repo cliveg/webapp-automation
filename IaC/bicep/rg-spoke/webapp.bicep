@@ -108,6 +108,7 @@ module appinsights '../CARML/Microsoft.Insights/components/deploy.bicep' = {
     name: appInsightsName
     workspaceResourceId: logAnalytics.outputs.resourceId
     location: location
+    appInsightsType: 'web'
   }
   scope: resourceGroup(resourceGroupName)
   dependsOn: [
