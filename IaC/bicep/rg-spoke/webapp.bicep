@@ -63,7 +63,12 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-08-01' existing 
   name: 'vnet-dev-clz-cac'
 }
 
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
+resource subnetPrivateEndpoints 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
+  parent: virtualNetwork
+  name: 'privateendpoints'
+}
+
+resource subnetSites 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = {
   parent: virtualNetwork
   name: 'privateendpoints'
 }
@@ -99,7 +104,6 @@ module clusterLa '../CARML/Microsoft.OperationalInsights/workspaces/deploy.bicep
 module serverfarms '../CARML/Microsoft.Web/serverfarms/deploy.bicep' = {
   name: webAppPlanName
   params: {
-    // Required parameters
     name: webAppPlanName
     location: location
     sku: {
@@ -117,21 +121,18 @@ module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
   name: webAppName
   params: {
     location: location
-    // Required parameters
     kind: 'app'
     name: webAppName
     serverFarmResourceId: serverfarms.outputs.resourceId
+    virtualNetworkSubnetId: subnetSites.id
     privateEndpoints:  [
-      // Example showing all available fields
       {
           // name: 'sxx-az-pe' // Optional: Name will be automatically generated if one is not provided here
-          subnetResourceId: subnet.id //'/subscriptions/<<subscriptionId>>/resourceGroups/validation-rg/providers/Microsoft.Network/virtualNetworks/sxx-az-vnet-x-001/subnets/sxx-az-subnet-x-001'
+          subnetResourceId: subnetPrivateEndpoints.id //'/subscriptions/<<subscriptionId>>/resourceGroups/validation-rg/providers/Microsoft.Network/virtualNetworks/sxx-az-vnet-x-001/subnets/sxx-az-subnet-x-001'
           service: 'sites'
-          // service: '<<serviceName>>' // e.g. vault registry file blob queue table etc.
           privateDnsZoneResourceIds: [ // Optional: No DNS record will be created if a private DNS zone Resource ID is not specified
               privateDnsZoneWeb
           ]
-
       }
     ]
   }
@@ -139,7 +140,8 @@ module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
   dependsOn: [
     rg
     privateDnsZoneWeb
-    subnet
+    subnetPrivateEndpoints
+    subnetSites
   ]
 }
 
