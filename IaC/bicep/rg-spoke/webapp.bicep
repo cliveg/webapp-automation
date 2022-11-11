@@ -139,7 +139,7 @@ module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
     kind: 'app'
     name: webAppName
     serverFarmResourceId: serverfarms.outputs.resourceId
-    appInsightId: appinsights.outputs.applicationId
+    // appInsightId: appinsights.outputs.applicationId
     virtualNetworkSubnetId: subnetSites.id
     privateEndpoints:  [
       {
