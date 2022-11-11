@@ -112,6 +112,7 @@ module appinsights '../CARML//Microsoft.Insights/components/deploy.bicep' = {
   scope: resourceGroup(resourceGroupName)
   dependsOn: [
     rg
+    logAnalytics
   ]
 }
 
