@@ -28,7 +28,7 @@ param resourceGroupName string = 'rg-bu0001a0008'
 ])
 param location string
 
-var subRgUniqueString = uniqueString('webApp', subscription().subscriptionId, resourceGroupName, location)
+//var subRgUniqueString = uniqueString('webApp', subscription().subscriptionId, resourceGroupName, location)
 //var webAppName = 'asp-${subRgUniqueString}'
 //var webAppName = '${uniqueString(deployment().name)}-sites'
 var webAppName = 'clive-az-wa-min-001'
@@ -62,10 +62,11 @@ resource rg 'Microsoft.Resources/resourceGroups@2019-05-01' existing = {
 
 
 module serverfarms '../CARML/Microsoft.Web/serverfarms/deploy.bicep' = {
-  name: webAppPlanName
+  name: webAppPlan
   params: {
     // Required parameters
-    name: '<<namePrefix>>-az-asp-x-001'
+//    name: '<<namePrefix>>-az-asp-x-001'
+    name: webAppPlanName
     sku: {
       capacity: '1'
       family: 'S'
@@ -83,7 +84,7 @@ module sites '../CARML/Microsoft.Web/sites/deploy.bicep' = {
     // Required parameters
     kind: 'app'
     name: webAppName
-    serverFarmResourceId: webAppPlanName.id
+    serverFarmResourceId: webAppPlan.id
   }
   scope: resourceGroup(resourceGroupName)
   dependsOn: [
